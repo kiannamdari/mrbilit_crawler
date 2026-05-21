@@ -16,11 +16,13 @@ class ScrapFlights:
         url = f'https://mrbilit.com/flights/{your_city}-{end_city}?departureDate={date}'
         response = requests.get(url, headers=headers)
         soup = BeautifulSoup(response.text, "html.parser")
-        bilits = soup.find_all('div', class_="lazy-mount")
+        bilits = soup.select('div.lazy-mount')
         print(response.text)
         print(response.status_code)
-        print(bilits)
+        for i in bilits:
+            print(i)
 
 
 s1 = ScrapFlights('https://mrbilit.com')
 s1.crawl('THR', 'MHD', '1405-02-31')
+
