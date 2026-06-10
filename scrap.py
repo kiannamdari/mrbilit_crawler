@@ -13,28 +13,48 @@ class CrawlerFlight:
 
     async def crawler(self, origin: str, destination: str, date: str):
         print('mrbilit is crawling')
-        user_agent = UserAgent.random
-        headers = {
-           'User-Agent': user_agent
-        }
+        ua = UserAgent()
+        user_agent = ua.random
+        try:
+            headers = {
+                'User-Agent': user_agent,
+                'Accept': 'application/json, text/plain, */*',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Content-Type': 'application/json-patch+json',
+                'Referer': 'https://mrbilit.com/',
+                'X-PlayerID': '163fc7ac-d5da-47f5-8b64-0dda1f91c522',
+                'SessionId': 'session_35080a0a-bc0e-4bcd-b1b8-5614a839a52b',
+                'Origin': 'https://mrbilit.com',
+                'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJidXMiOiI0ZiIsInRybiI6IjE3Iiwic3JjIjoiMiJ9.vvpr9fgASvk7B7I4KQKCz-SaCmoErab_p3csIvULG1w',  # ✅ required
+            }
+        except Exception as e:
+            print('this error is related to headers', e)
         payload = {
             'AdultCount': 1,
             'ChildCount': 0,
             'InfantCount': 0,
             'CabinClass': 'All',
-            'routes': [{
-                'OriginIataCode': origin,
-                'DestinationIataCode': destination,
-                'DepartureDate': date
-            }]
+            'Routes': [
+                {
+                    'OriginCode': origin,
+                    'DestinationCode': destination,
+                    'DepartureDate': date
+                }
+            ],
+            'Baggage': True,
+            'IncludeFlightsWithHigherCapacity': False
         }
-        async with aiohttp.ClientSession() as Session:
-            async with Session.post(self.api, headers=headers, json=payload) as response:
-                json_response = await response.json()
-                flight_list = json_response.get('Flights')
-                print(flight_list)
+        try:
+            async with aiohttp.ClientSession() as Session:
+                async with Session.post('https://flight.atighgasht.com/api/Flights', headers=headers, json=payload) as response:
 
+                    json_response = await response.json()
+                    flights = json_response.get('Flights')
+                    print(flights)
+                    print('mrbilit is crawled')
+        except Exception as e:
+            print('this error is related to aiohttp:', e)
 
 object1 = CrawlerFlight()
-asyncio.run(object1.crawler('THR', 'MHD', '2026/05/31'))
+asyncio.run(object1.crawler('MHD', 'THR', '2026-6-11'))
 
