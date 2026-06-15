@@ -50,31 +50,29 @@ class CrawlerFlight:
 
                     json_response = await response.json()
                     flights = json_response.get('Flights')
-                    print(json_response)
-                    print('mrbilit is crawled')
+                    print(flights)
         except Exception as e:
             print('this error is related to aiohttp:', e)
         try:
-            def price(self):
                 price = \
                     {
                     'AdultFare': None,
                     'ChildFare': None,
                     'InfantFare': None,
                     }
-                if len(flights[0].get('prices')) > 0:
+                if len(flights[0].get('Prices')) > 0:
                     passenger_fares = flights[0].get('Prices')[0].get('PassengerFares')
+                    total_prices = list()
                     for i in passenger_fares:
-                        if i == 0:
-                            price.update({'AdultFare': i.get('TotalFare')})
-                        elif i == 1:
-                            price.update({'ChildFare': i.get('TotalFare')})
-                        elif i == 2:
-                            price.update({'InfantFare': i.get('TotalFare')})
+                        total_prices.append(i.get('TotalFare'))
+
+                    price.update({'AdultFare': total_prices[0]})
+                    price.update({'ChildFare': total_prices[1]})
+                    price.update({'InfantFare': total_prices[2]})
                 print(price)
         except Exception as e:
             print('this error is related to price:', e)
-            return 0
+        print('mrbilit is crawled')
 object1 = CrawlerFlight()
-asyncio.run(object1.crawler('MHD', 'THR', '2026-6-11'))
+asyncio.run(object1.crawler('THR', 'MHD', '2026-6-16'))
 
