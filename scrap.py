@@ -50,29 +50,34 @@ class CrawlerFlight:
 
                     json_response = await response.json()
                     flights = json_response.get('Flights')
-                    print(flights)
+                    for flight in flights:
+                        flight_list = flight
+                    print(flight_list)
+                    print('mrbilit is crawled')
+                    return flight_list
         except Exception as e:
             print('this error is related to aiohttp:', e)
+    def find_price(self, flights):
         try:
-                price = \
-                    {
-                    'AdultFare': None,
-                    'ChildFare': None,
-                    'InfantFare': None,
-                    }
-                if len(flights[0].get('Prices')) > 0:
-                    passenger_fares = flights[0].get('Prices')[0].get('PassengerFares')
-                    total_prices = list()
-                    for i in passenger_fares:
-                        total_prices.append(i.get('TotalFare'))
+            price = \
+                 {
+                'AdultFare': None,
+                'ChildFare': None,
+                'InfantFare': None,
+                }
+            if len(flights[0].get('Prices')) > 0:
+                passenger_fares = flights[0].get('Prices')[0].get('PassengerFares')
+                total_prices = list()
+                for i in passenger_fares:
+                    total_prices.append(i.get('TotalFare'))
 
-                    price.update({'AdultFare': total_prices[0]})
-                    price.update({'ChildFare': total_prices[1]})
-                    price.update({'InfantFare': total_prices[2]})
+                price.update({'AdultFare': total_prices[0]})
+                price.update({'ChildFare': total_prices[1]})
+                price.update({'InfantFare': total_prices[2]})
                 print(price)
+                return price
         except Exception as e:
             print('this error is related to price:', e)
-        print('mrbilit is crawled')
-object1 = CrawlerFlight()
-asyncio.run(object1.crawler('THR', 'MHD', '2026-6-16'))
 
+object1 = CrawlerFlight()
+asyncio.run(object1.crawler('THR', 'MHD', '2026-6-20'))
