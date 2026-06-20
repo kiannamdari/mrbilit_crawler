@@ -50,34 +50,55 @@ class CrawlerFlight:
 
                     json_response = await response.json()
                     flights = json_response.get('Flights')
-                    for flight in flights:
-                        flight_list = flight
-                    print(flight_list)
-                    print('mrbilit is crawled')
-                    return flight_list
+                    ticket_list = self.ticket(flights)
+                    return ticket_list
+
+
         except Exception as e:
             print('this error is related to aiohttp:', e)
-    def find_price(self, flights):
-        try:
-            price = \
-                 {
-                'AdultFare': None,
-                'ChildFare': None,
-                'InfantFare': None,
-                }
-            if len(flights[0].get('Prices')) > 0:
-                passenger_fares = flights[0].get('Prices')[0].get('PassengerFares')
-                total_prices = list()
-                for i in passenger_fares:
-                    total_prices.append(i.get('TotalFare'))
 
-                price.update({'AdultFare': total_prices[0]})
-                price.update({'ChildFare': total_prices[1]})
-                price.update({'InfantFare': total_prices[2]})
-                print(price)
-                return price
+    def ticket(self,flights):
+        try:
+            ticket_list = list()
+            for flight in flights:
+                price = self.find_price(flight)
+                capacity = self.find_capacity(flight)
+                leg = flight.get('Segments')[0].get('Legs')[0]
+                ticket = {
+                    'provider_name': 'mrbilit',
+                    'adult_price': price,
+                    'capacity': capacity,
+                    'origin': leg.get('Origin'),
+                    'destination': leg.get('Destination'),
+                    'departure_time': leg.get('DepartureTime'),
+                    'arrival_time': leg.get('ArrivalTime'),
+                    'persian_title': leg.get('Airline').get('PersianTitle'),
+                    'english_title': leg.get('Airline').get('EnglishTitle'),
+                    'flights_number': leg.get('FlightsNumber'),
+                }
+                ticket_list.append(ticket)
+
+            print(ticket_list)
+            return ticket_list
+            print('mrbilit is crawled')
+        except Exception as e:
+            print('this error is related to ticket:', e)
+
+    def find_price(self, flight):
+        try:
+            if len(flight.get('Prices')) > 0:
+                adult_price = flight.get('Prices')[0].get('PassengerFares')[0].get('TotalFare')
+                return adult_price
         except Exception as e:
             print('this error is related to price:', e)
+
+    def find_capacity(self, flight):
+        try:
+            if len(flight.get('Prices')) > 0:
+                capacity = flight.get('Prices')[0].get('Capacity')
+                return capacity
+        except Exception as e:
+            print('this error is related to find_capacity:', e)
 
 object1 = CrawlerFlight()
 asyncio.run(object1.crawler('THR', 'MHD', '2026-6-20'))
