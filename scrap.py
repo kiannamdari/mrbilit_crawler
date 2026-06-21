@@ -46,7 +46,7 @@ class CrawlerFlight:
         }
         try:
             async with aiohttp.ClientSession() as Session:
-                async with Session.post('https://flight.atighgasht.com/api/Flights', headers=headers, json=payload) as response:
+                async with Session.post(self.api, headers=headers, json=payload) as response:
 
                     json_response = await response.json()
                     flights = json_response.get('Flights')
@@ -74,7 +74,7 @@ class CrawlerFlight:
                     'arrival_time': leg.get('ArrivalTime'),
                     'persian_title': leg.get('Airline').get('PersianTitle'),
                     'english_title': leg.get('Airline').get('EnglishTitle'),
-                    'flights_number': leg.get('FlightsNumber'),
+                    'flights_number': leg.get('FlightNumber'),
                 }
                 ticket_list.append(ticket)
 
@@ -101,4 +101,4 @@ class CrawlerFlight:
             print('this error is related to find_capacity:', e)
 
 object1 = CrawlerFlight()
-asyncio.run(object1.crawler('THR', 'MHD', '2026-6-20'))
+asyncio.run(object1.crawler('THR', 'MHD', '2026-6-21'))
