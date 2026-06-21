@@ -1,2 +1,2 @@
 class ConfigFlight:
-    flights_api = 'flight.atighgasht.com'
+    flights_api = 'https://flight.atighgasht.com/api/Flights'
