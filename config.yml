@@ -1,2 +1,5 @@
-class ConfigFlight:
-    flights_api = 'flight.atighgasht.com'
+config_flight:
+    flights_api: 'flight.atighgasht.com'
+
+config_trains:
+    trains_api: 'https://train.mrbilit.com/api/GetAvailable/v2?from=1&to=191&date=2026-06-24&genderCode=3&adultCount=1&childCount=0&infantCount=0&exclusive=false&availableStatus=Both'
