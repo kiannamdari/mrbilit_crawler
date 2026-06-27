@@ -1,2 +1,5 @@
-class ConfigFlight:
-    flights_api = 'flight.atighgasht.com'
+config_flight:
+    flights_api: 'flight.atighgasht.com'
+
+config_bus:
+    buses_api: 'https://bus.mrbilit.com/api/GetBusServices'
