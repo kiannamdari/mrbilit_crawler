@@ -69,6 +69,8 @@ class CrawlerBus:
                     'arrival_time': bus.get('arrivalTime'),
                     'persian_title': bus.get('superCorporation'),
                 }
+                if ticket.get('adult_price') is None:
+                    continue
                 ticket_list.append(ticket)
 
             return ticket_list
