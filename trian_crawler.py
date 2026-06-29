@@ -75,6 +75,8 @@ class CrawlerTrains:
                     'corporation_name': train.get('corporationName'),
                     'train_number': train.get('trainNumber')
                 }
+                if ticket.get('adult_price') is None:
+                    continue
                 ticket_list.append(ticket)
 
             return ticket_list
