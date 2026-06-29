@@ -76,6 +76,8 @@ class CrawlerFlight:
                     'english_title': leg.get('Airline').get('EnglishTitle'),
                     'flights_number': leg.get('FlightNumber'),
                 }
+                if ticket.get('adult_price') is None:
+                    continue
                 ticket_list.append(ticket)
 
             print(ticket_list)
