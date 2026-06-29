@@ -59,6 +59,8 @@ class CrawlerHotel:
                     'address': hotel.get('shortAddress'),
                     'hotel_ranking': hotel.get('hotelTypeTitle'),
                 }
+                if ticket.get('adult_price') is None:
+                    continue
                 ticket_list.append(ticket)
 
             return ticket_list
