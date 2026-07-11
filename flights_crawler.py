@@ -70,7 +70,7 @@ class CrawlerFlight:
                 }
                 air_lines.append(air_line)
             with open("air_lines.json", "w", encoding="utf-8") as f:
-                f.write(json.dumps(air_lines, indent=4))
+                json.dump(air_lines, f, ensure_ascii=False, indent=2)
             return air_lines
 
         except Exception as e:
@@ -102,7 +102,7 @@ class CrawlerFlight:
                 index_counter += 1
             print(ticket_list)
             with open("tickets.json", "w", encoding="utf-8") as f:
-                f.write(json.dumps(ticket_list, indent=4))
+                json.dump(ticket_list, f, ensure_ascii=False, indent=4)
             return ticket_list
         except Exception as e:
             print('this error is related to ticket:', e)
