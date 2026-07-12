@@ -3,6 +3,13 @@ import yaml
 
 
 def config_loader(filename="config.yml", search_paths=None):
+    """
+    Finds a YAML file and loads it into a dictionary.
+
+    :param filename: name of the yml file to find
+    :param search_paths: list of directories to search in (default: current dir + script dir)
+    :return: dict with config data
+    """
     if search_paths is None:
         search_paths = [
             os.getcwd(),
@@ -18,7 +25,6 @@ def config_loader(filename="config.yml", search_paths=None):
 
     raise FileNotFoundError(f"Could not find '{filename}' in: {search_paths}")
 
-
-
+# Module-level singleton so other files can do: from config_loader import config
 config = config_loader("config.yml")
 
