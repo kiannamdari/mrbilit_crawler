@@ -1,60 +1,129 @@
+import asyncio
 import tkinter as tk
+from datetime import datetime
 from tkinter import ttk, messagebox
 
+# Your crawler
+from scrapk import CrawlerTrains   # ← adjust import path/filename if different
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  🔌 PLUG YOUR CODE HERE — replace every function marked with  ← YOUR CODE
+#  🔌 PLUG YOUR CODE HERE
 # ═══════════════════════════════════════════════════════════════════════════════
+
+# UI shows city *names*, the API needs station/city codes. Map them here.
+CITY_CODES = {
+    "Tehran": "THR",
+    "Mashhad": "MHD",
+    "Isfahan": "IFN",
+    "Shiraz": "SYZ",
+    "Tabriz": "TBZ",
+    "Ahvaz": "AWZ",
+    "Kermanshah": "KSH",
+    "Rasht": "RAS",
+    "Kerman": "KER",
+    "Yazd": "AZD",
+    "Bandar Abbas": "BND",
+    "Urmia": "OMH",
+    "Zahedan": "ZAH",
+    "Arak": "KKS",
+    "Hamadan": "HDM",
+}
+
+_crawler = CrawlerTrains()
+
+
+def _hms(iso_time: str) -> str:
+    """'2026-06-24T08:30:00' -> '08:30'  (falls back to raw string on parse error)"""
+    if not iso_time:
+        return "--:--"
+    try:
+        return datetime.fromisoformat(iso_time).strftime("%H:%M")
+    except ValueError:
+        try:
+            return iso_time.split("T")[1][:5]
+        except Exception:
+            return iso_time
+
+
+def _duration(dep_iso: str, arr_iso: str) -> str:
+    try:
+        dep = datetime.fromisoformat(dep_iso)
+        arr = datetime.fromisoformat(arr_iso)
+        delta = arr - dep
+        total_minutes = int(delta.total_seconds() // 60)
+        h, m = divmod(total_minutes, 60)
+        return f"{h}:{m:02d}"
+    except Exception:
+        return "?"
+
 
 def search_tickets(origin: str, destination: str, date: str, passengers: int) -> list[dict]:
     """
-    ← YOUR CODE: call your ticket-finding logic here.
-
-    Must return a list of dicts, each with these keys:
-      {
-        "id":        str,   # unique ticket ID
-        "name":      str,   # carrier / train / bus name
-        "dep_time":  str,   # departure  e.g. "08:30"
-        "arr_time":  str,   # arrival    e.g. "14:15"
-        "duration":  str,   # e.g. "5:45"
-        "transport": str,   # e.g. "Train" / "Bus" / "Flight"
-        "price":     int,   # price per person
-        "seats":     int,   # available seats
-      }
+    Calls the mrbilit train crawler and reshapes its raw train dicts into the
+    format the UI expects.
     """
-    # ── REMOVE this stub and plug your real function ──────────────────────────
-    return []
+    origin_code = CITY_CODES.get(origin, origin)
+    dest_code = CITY_CODES.get(destination, destination)
+
+    # UI date format is "YYYY/MM/DD" -> crawler/API wants "YYYY-MM-DD"
+    api_date = date.replace("/", "-")
+
+    try:
+        raw_tickets = asyncio.run(_crawler.crawler(origin_code, dest_code, api_date))
+    except Exception as ex:
+        print("search_tickets error:", ex)
+        raw_tickets = None
+
+    if not raw_tickets:
+        return []
+
+    tickets = []
+    for i, raw in enumerate(raw_tickets):
+        dep_iso = raw.get("departure_time", "")
+        arr_iso = raw.get("arrival_time", "")
+        price = raw.get("adult_price") or 0
+        capacity = raw.get("capacity") or 0
+        train_number = raw.get("train_number") or ""
+        corp = raw.get("corporation_name") or raw.get("provider_name", "")
+
+        tickets.append({
+            "id": f"mrbilit-train-{train_number}-{i}",
+            "name": f"{corp} {train_number}".strip(),
+            "dep_time": _hms(dep_iso),
+            "arr_time": _hms(arr_iso),
+            "duration": _duration(dep_iso, arr_iso),
+            "transport": "Train",
+            "price": int(price),
+            "seats": int(capacity),
+        })
+
+    # Cheapest first
+    tickets.sort(key=lambda t: t["price"])
+    return tickets
 
 
 def buy_ticket(ticket: dict, origin: str, destination: str,
                date: str, passengers: int) -> dict:
     """
-    ← YOUR CODE: handle the purchase when user clicks 'Buy Ticket'.
-
-    Return a dict:
-      { "success": bool, "message": str, "booking_code": str }
+    ← YOUR CODE: hook up real booking logic here (mrbilit doesn't expose a
+    public booking endpoint in the crawler, so this stays a stub for now).
     """
-    # ── REMOVE this stub and plug your real function ──────────────────────────
-    return {"success": False, "message": "Not connected yet", "booking_code": ""}
+    return {
+        "success": False,
+        "message": "Booking is not wired up yet — only search is connected.",
+        "booking_code": "",
+    }
 
 
 def get_cities() -> list[str]:
-    """
-    ← YOUR CODE (optional): return list of city names for the dropdowns.
-    Default list is used if you leave this as-is.
-    """
-    return [
-        "Tehran", "Mashhad", "Isfahan", "Shiraz", "Tabriz",
-        "Ahvaz", "Kermanshah", "Rasht", "Kerman", "Yazd",
-        "Bandar Abbas", "Urmia", "Zahedan", "Arak", "Hamadan",
-    ]
+    return list(CITY_CODES.keys())
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  UI — no need to edit below unless you want to change layout / style
+#  UI — unchanged from your original
 # ═══════════════════════════════════════════════════════════════════════════════
 
-# ── Palette ────────────────────────────────────────────────────────────────────
 C = {
     "bg": "#0F1117",
     "card": "#1A1D27",
@@ -93,7 +162,6 @@ class App(tk.Tk):
         self._search_bar()
         self._results_area()
 
-    # ── TTK styles ─────────────────────────────────────────────────────────────
     def _style(self):
         s = ttk.Style(self)
         s.theme_use("clam")
@@ -108,7 +176,6 @@ class App(tk.Tk):
                     background=C["card"], troughcolor=C["bg"],
                     bordercolor=C["bg"], arrowcolor=C["muted"])
 
-    # ── Header ─────────────────────────────────────────────────────────────────
     def _header(self):
         h = tk.Frame(self, bg=C["hdr"], height=52)
         h.pack(fill="x")
@@ -118,7 +185,6 @@ class App(tk.Tk):
         tk.Label(h, text="Online Ticket Sales", bg=C["hdr"], fg=C["muted"],
                  font=FONT_SMALL).pack(side="left", padx=4)
 
-    # ── Search bar ─────────────────────────────────────────────────────────────
     def _search_bar(self):
         wrap = tk.Frame(self, bg=C["bg"])
         wrap.pack(fill="x", padx=28, pady=18)
@@ -144,7 +210,6 @@ class App(tk.Tk):
 
         self.cb_origin = labeled_combo(row, "From", self._cities, self._cities[0])
 
-        # Swap button
         sf = tk.Frame(row, bg=C["card"])
         sf.pack(side="left", padx=2, pady=14)
         sw = tk.Label(sf, text=" ⇄ ", bg=C["input"], fg=C["blue"],
@@ -155,13 +220,11 @@ class App(tk.Tk):
         self.cb_dest = labeled_combo(row, "To", self._cities,
                                      self._cities[1] if len(self._cities) > 1 else self._cities[0])
 
-        # Date
-        from datetime import datetime, timedelta
+        from datetime import timedelta
         today = datetime.now()
         dates = [(today + timedelta(days=i)).strftime("%Y/%m/%d") for i in range(60)]
         self.cb_date = labeled_combo(row, "Date", dates, dates[0], width=13)
 
-        # Passengers
         pf = tk.Frame(row, bg=C["card"])
         pf.pack(side="left", padx=8)
         tk.Label(pf, text="Passengers", bg=C["card"], fg=C["muted"],
@@ -173,7 +236,6 @@ class App(tk.Tk):
                    highlightthickness=1, highlightbackground=C["border"]
                    ).pack(ipady=7)
 
-        # Search button
         bf = tk.Frame(row, bg=C["card"])
         bf.pack(side="left", padx=12, pady=12)
         self.search_btn = tk.Label(bf, text="  Search  ", bg=C["blue"],
@@ -184,7 +246,6 @@ class App(tk.Tk):
         self.search_btn.bind("<Enter>", lambda e: self.search_btn.config(bg=C["blue_dim"]))
         self.search_btn.bind("<Leave>", lambda e: self.search_btn.config(bg=C["blue"]))
 
-    # ── Results area ───────────────────────────────────────────────────────────
     def _results_area(self):
         self.res_wrap = tk.Frame(self, bg=C["bg"])
         self.res_wrap.pack(fill="both", expand=True, padx=28, pady=(0, 18))
@@ -196,7 +257,6 @@ class App(tk.Tk):
         tk.Label(self.res_wrap, text=msg, bg=C["bg"], fg=C["muted"],
                  font=("Tahoma", 12)).pack(expand=True)
 
-    # ── Search action ──────────────────────────────────────────────────────────
     def _search(self):
         origin = self.cb_origin.get()
         dest = self.cb_dest.get()
@@ -219,14 +279,12 @@ class App(tk.Tk):
         self._results = tickets
         self._render_results(origin, dest, date, pax)
 
-    # ── Render result cards ────────────────────────────────────────────────────
     def _render_results(self, origin, dest, date, pax):
         for w in self.res_wrap.winfo_children():
             w.destroy()
 
         tickets = self._results
 
-        # Status bar
         bar = tk.Frame(self.res_wrap, bg=C["bg"])
         bar.pack(fill="x", pady=(0, 8))
         tk.Label(bar, text=f"{origin}  →  {dest}   |   {date}   |   {pax} passenger(s)",
@@ -242,7 +300,6 @@ class App(tk.Tk):
                      justify="center").pack(expand=True)
             return
 
-        # Scrollable list
         canvas = tk.Canvas(self.res_wrap, bg=C["bg"], bd=0, highlightthickness=0)
         vsb = ttk.Scrollbar(self.res_wrap, orient="vertical", command=canvas.yview)
         sf = tk.Frame(canvas, bg=C["bg"])
@@ -258,7 +315,6 @@ class App(tk.Tk):
         for t in tickets:
             self._card(sf, t, origin, dest, date, pax)
 
-    # ── Single ticket card ─────────────────────────────────────────────────────
     def _card(self, parent, t: dict, origin, dest, date, pax):
         card = tk.Frame(parent, bg=C["card"], padx=18, pady=14,
                         highlightthickness=1, highlightbackground=C["border"])
@@ -269,7 +325,6 @@ class App(tk.Tk):
         row = tk.Frame(card, bg=C["card"])
         row.pack(fill="x")
 
-        # ── Left: transport type + name ───────────────────────────────────────
         info = tk.Frame(row, bg=C["card"])
         info.pack(side="left")
         tk.Label(info, text=t.get("transport", "—"), bg=C["card"],
@@ -277,7 +332,6 @@ class App(tk.Tk):
         tk.Label(info, text=t.get("name", ""), bg=C["card"],
                  fg=C["muted"], font=FONT_SMALL).pack(anchor="w")
 
-        # ── Center: timeline ──────────────────────────────────────────────────
         timeline = tk.Frame(row, bg=C["card"])
         timeline.pack(side="left", padx=32, expand=True)
 
@@ -295,7 +349,6 @@ class App(tk.Tk):
         tk.Label(timeline, text=t.get("arr_time", "--:--"), bg=C["card"],
                  fg=C["text"], font=FONT_MONO).pack(side="left")
 
-        # ── Right: price + buy ────────────────────────────────────────────────
         price_area = tk.Frame(row, bg=C["card"])
         price_area.pack(side="right")
 
@@ -316,7 +369,6 @@ class App(tk.Tk):
         btn.bind("<Enter>", lambda e: btn.config(bg=C["blue_dim"]))
         btn.bind("<Leave>", lambda e: btn.config(bg=C["blue"]))
 
-    # ── Buy action ─────────────────────────────────────────────────────────────
     def _buy(self, t: dict, origin, dest, date, pax):
         price = t.get("price", 0)
         confirm = messagebox.askyesno(
@@ -343,7 +395,6 @@ class App(tk.Tk):
         else:
             messagebox.showerror("Failed", result.get("message", "Unknown error"))
 
-    # ── Swap cities ────────────────────────────────────────────────────────────
     def _swap(self, _=None):
         o, d = self.cb_origin.get(), self.cb_dest.get()
         self.cb_origin.set(d)
@@ -352,5 +403,3 @@ class App(tk.Tk):
 
 if __name__ == "__main__":
     App().mainloop()
-
-

@@ -25,6 +25,6 @@ def config_loader(filename="config.yml", search_paths=None):
 
     raise FileNotFoundError(f"Could not find '{filename}' in: {search_paths}")
 
-
 # Module-level singleton so other files can do: from config_loader import config
 config = config_loader("config.yml")
+
