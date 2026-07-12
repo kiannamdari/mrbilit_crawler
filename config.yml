@@ -1,2 +1,5 @@
 config_flight:
     flights_api: 'https://flight.atighgasht.com'
+
+config_taxi:
+    taxis_api: 'https://bus.mrbilit.ir/api/GetTaxiServices'
