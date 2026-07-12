@@ -1,12 +1,12 @@
 import aiohttp
 import asyncio
 
-from config import ConfigFlight
+from config_loader import config
 from fake_useragent import UserAgent
 
 
 class CrawlerFlight:
-    api = ConfigFlight.flights_api
+    api = config.get("config_flights").get("flights_api")
 
     def __init__(self):
         super().__init__()
@@ -103,4 +103,4 @@ class CrawlerFlight:
             print('this error is related to find_capacity:', e)
 
 object1 = CrawlerFlight()
-asyncio.run(object1.crawler('THR', 'MHD', '2026-6-21'))
+asyncio.run(object1.crawler('THR', 'MHD', '2026-7-13'))
