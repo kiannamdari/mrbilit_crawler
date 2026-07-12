@@ -1,3 +1,5 @@
 .idea/
 __pycache__/
 .venv/
+tickets.json
+air_lines.json

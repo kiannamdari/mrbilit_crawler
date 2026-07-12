@@ -1,2 +1,4 @@
 config_flight:
-    flights_api: 'https://flight.atighgasht.com'
+    flights_api: 'https://flight.atighgasht.com/api/Flights'
+
+
