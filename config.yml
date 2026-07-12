@@ -1,2 +1,5 @@
 config_flight:
     flights_api: 'https://flight.atighgasht.com'
+
+config_hotel:
+    hotels_api: 'https://hotel.mrbilit.ir/api/hotels/v2/hotels/search?adultCount=1&childrenCount=0&roomCount=1&from=2026-06-28&to=2026-06-29&cityName=tehran&hasHotelInName=true'
