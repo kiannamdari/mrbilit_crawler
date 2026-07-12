@@ -18,7 +18,4 @@ def config_loader(filename="config.yml", search_paths=None):
 
     raise FileNotFoundError(f"Could not find '{filename}' in: {search_paths}")
 
-
-
 config = config_loader("config.yml")
-
