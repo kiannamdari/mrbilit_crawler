@@ -2,12 +2,12 @@ import aiohttp
 import asyncio
 import json
 
-from config import ConfigFlight
+from config_loader import config
 from fake_useragent import UserAgent
 
 
 class CrawlerFlight:
-    api = ConfigFlight.flights_api
+    api = config.get("config_flights").get("flights_api")
 
     def __init__(self):
         super().__init__()
