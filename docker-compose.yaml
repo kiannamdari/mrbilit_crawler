@@ -1,0 +1,22 @@
+services:
+  flights_tickets:
+    image: flights_tickets:1.0.4
+    container_name: flights_tickets
+    environment: 
+      - DISPLAY=${DISPLAY}
+      - XAUTHORITY=/tmp/.Xauthority
+    command: python3 flights_ui.py
+    volumes:
+      - mrbilit-vol:/app
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ~/.Xauthority:/tmp/.Xauthority:rw
+    networks:
+      flights_tickets:
+        aliases:
+          - "flights_tickets"
+volumes:
+  mrbilit-vol:
+    driver: local
+networks:
+  flights_tickets:
+    driver: bridge
