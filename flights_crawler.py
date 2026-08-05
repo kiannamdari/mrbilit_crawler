@@ -6,7 +6,7 @@ from fake_useragent import UserAgent
 
 
 class CrawlerFlight:
-    api = config.get("config_flights").get("flights_api")
+    api = config.get("config_flight").get("flights_api")
 
     def __init__(self):
         super().__init__()
