@@ -4,7 +4,7 @@ from datetime import datetime
 from tkinter import ttk, messagebox
 
 # Your crawler
-from scrap import CrawlerFlight   # ← adjust import path/filename if different
+from flights_crawler import CrawlerFlight   # ← adjust import path/filename if different
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
